@@ -21,12 +21,18 @@ def getHTML(base, payload, max_expands=100):
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
     
-    driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
-        options=options
-    )
-    driver.get(buildURL(base, payload))
+    try: 
+        driver = webdriver.Chrome(
+            service=Service(ChromeDriverManager().install()),
+            options=options
+        )
+    except:
+        driver = webdriver.Chrome(
+            service=Service(executable_path = "/usr/bin/chromedriver"),
+            options=options
+        )
     
+    driver.get(buildURL(base, payload))
     # Reject Cookies
     try:
         WebDriverWait(driver, 5).until(EC.presence_of_element_located((

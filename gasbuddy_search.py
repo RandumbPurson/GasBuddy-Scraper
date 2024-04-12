@@ -1,6 +1,4 @@
-import requests
 from bs4 import BeautifulSoup
-from fake_useragent import UserAgent
 from typing import Literal
 
 from getHTML import getHTML

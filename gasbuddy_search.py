@@ -25,7 +25,6 @@ def get_prices(soup):
 class Search:
     def __init__(self, **kwargs):
         self.payload = {}
-        self.ua = UserAgent(**kwargs)
 
     def search(self, val):
         """ search for a city, place, or zip code

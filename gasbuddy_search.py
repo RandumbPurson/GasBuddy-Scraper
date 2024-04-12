@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 from typing import Literal
 
+from getHTML import getHTML
+
 fuelTypeMap = {"regular": 1, "midgrade": 2, "premium":3}
 price_class = "text__xl___2MXGo text__left___1iOw3 StationDisplayPrice-module__price___3rARL"
 address_class = "StationDisplay-module__address___2_c7v"
@@ -13,7 +15,6 @@ def get_brands(soup):
 
 def get_addresses(soup): 
     return [el.get_text() for el in soup.find_all(class_=address_class)]
-
 
 def process_price(price):
     if "$" in price:
@@ -55,18 +56,14 @@ class Search:
         self.payload["maxAge"] = val
         return self
 
-    def get(self):
+    def get(self, max_expands=100):
         """ get the data
         """
-        req = requests.get(
-            "https://www.gasbuddy.com/home",
-            headers={"User-Agent": self.ua.random},
-            params=self.payload
-        )
-        soup = BeautifulSoup(req.content, features="html.parser")
-        return {
+        html = getHTML("https://www.gasbuddy.com/home", self.payload, max_expands)
+        soup = BeautifulSoup(html, features="html.parser")
+        data = {
             "addresses": get_addresses(soup),
             "brands": get_brands(soup),
             "prices": get_prices(soup)
         }
-        
+        return data

@@ -1,3 +1,4 @@
+import datetime
 from bs4 import BeautifulSoup
 from typing import Literal
 
@@ -11,15 +12,18 @@ header_class = "header__header3___1b1oq header__header___1zII0 header__midnight_
 def get_brands(soup):
     return [el.find("a").get_text() for el in soup.find_all(class_=header_class)]
 
-def get_addresses(soup): 
-    return [el.get_text() for el in soup.find_all(class_=address_class)]
+def get_addresses(soup, delim="^^^"):
+    addresses = soup.find_all(class_=address_class)
+    for address in addresses:
+        address.find("br").replaceWith(delim)
+    return [el.get_text().split(delim) for el in addresses]
 
 def process_price(price):
     if "$" in price:
         return float(price.replace("$", ""))
     else:
         return None
-def get_prices(soup): 
+def get_prices(soup):
     return [process_price(el.get_text()) for el in soup.find_all(class_=price_class)]
 
 class Search:
@@ -58,9 +62,13 @@ class Search:
         """
         html = getHTML("https://www.gasbuddy.com/home", self.payload, max_expands)
         soup = BeautifulSoup(html, features="html.parser")
+        addresses, cities = zip(*get_addresses(soup))
+        n = len(addresses)
         data = {
-            "addresses": get_addresses(soup),
+            "addresses": addresses,
+            "cities": cities,
             "brands": get_brands(soup),
-            "prices": get_prices(soup)
+            "prices": get_prices(soup),
+            "time": [datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")]*n
         }
         return data
